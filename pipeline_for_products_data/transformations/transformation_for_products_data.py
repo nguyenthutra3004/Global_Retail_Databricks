@@ -3,11 +3,11 @@ from pyspark.sql.functions import (
     col, when, current_timestamp
 )
 
-
-# This file defines a sample transformation.
-# Edit the sample below or add new transformations
-# using "+ Add" in the file browser.
-
+@dlt.table(
+    comment="Raw product data from bronze layer"
+)
+def bronze_products_transform():
+    return spark.read.table("workspace.default.bronze_products")
 
 @dlt.table(
     name="silver_products",
@@ -19,7 +19,7 @@ from pyspark.sql.functions import (
 @dlt.expect("valid_rating", "rating BETWEEN 0 AND 5")
 @dlt.expect("valid_stock", "stock_quantity >= 0")
 def silver_products():
-    df = dlt.read("bronze_products")
+    df = dlt.read("bronze_products_transform")
 
     cleaned_df = df.filter(
         col("name").isNotNull() & col("category").isNotNull()
